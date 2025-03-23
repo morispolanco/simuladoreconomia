@@ -1,7 +1,8 @@
 import streamlit as st
 import requests
+import json
 
-# Configuración de la API Key desde Streamlit Secrets (sin valor por defecto en el código)
+# Configuración de la API Key desde Streamlit Secrets
 API_KEY = st.secrets["API_KEY"]
 
 # Diccionario con conceptos económicos y sus explicaciones
@@ -48,7 +49,7 @@ economic_concepts = {
     }
 }
 
-# Función para consultar la API
+# Función para consultar la API con mejor manejo de errores
 def get_api_response(concept):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
@@ -61,9 +62,17 @@ def get_api_response(concept):
     }
     try:
         response = requests.post(url, headers=headers, json=data)
-        return response.json()["choices"][0]["message"]["content"]
-    except Exception as e:
+        response.raise_for_status()  # Lanza una excepción si el código HTTP no es 200
+        response_json = response.json()
+        st.write("Respuesta completa de la API:", response_json)  # Para depuración
+        if "choices" in response_json and len(response_json["choices"]) > 0:
+            return response_json["choices"][0]["message"]["content"]
+        else:
+            return f"Error: La respuesta de la API no contiene 'choices'. Respuesta: {json.dumps(response_json)}"
+    except requests.exceptions.RequestException as e:
         return f"No se pudo conectar a la API: {str(e)}"
+    except KeyError as e:
+        return f"Error en la estructura de la respuesta: {str(e)}"
 
 # Configuración de la aplicación Streamlit
 st.title("Simulador de Conceptos Económicos")
