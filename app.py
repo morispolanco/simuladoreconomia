@@ -1,98 +1,87 @@
 import streamlit as st
-import requests
-import json
 
-# Configuración de la API Key desde Streamlit Secrets
-API_KEY = st.secrets["API_KEY"]
+def main():
+    st.title("10 Conceptos Económicos Complejos Explicados")
+    st.write("Selecciona un concepto para aprender más sobre él")
 
-# Diccionario con conceptos económicos y sus explicaciones
-economic_concepts = {
-    "1. Elasticidad de la demanda": {
-        "description": "Mide cómo responde la cantidad demandada de un bien ante cambios en su precio.",
-        "simulation": "Si el precio de un café sube de $2 a $3 y la demanda cae de 100 a 80 tazas, la elasticidad es -0.67."
-    },
-    "2. Costo de oportunidad": {
-        "description": "El valor de la mejor alternativa a la que se renuncia al tomar una decisión.",
-        "simulation": "Si estudias 2 horas en vez de trabajar ($10/hora), tu costo de oportunidad es $20."
-    },
-    "3. Ventaja comparativa": {
-        "description": "Capacidad de producir un bien a un menor costo de oportunidad que otros.",
-        "simulation": "País A produce 10 carros o 5 casas, País B produce 6 carros o 4 casas."
-    },
-    "4. Externalidades": {
-        "description": "Costos o beneficios que afectan a terceros no involucrados en la transacción.",
-        "simulation": "Una fábrica contamina un río, afectando a pescadores cercanos."
-    },
-    "5. Producto Marginal": {
-        "description": "Aumento en la producción al añadir una unidad más de un factor.",
-        "simulation": "Con 2 trabajadores produces 10 sillas, con 3 produces 18: MP = 8."
-    },
-    "6. Inflación": {
-        "description": "Aumento sostenido en el nivel general de precios.",
-        "simulation": "Si un pan costaba $1 y ahora $1.10, la inflación es del 10%."
-    },
-    "7. Curva de Phillips": {
-        "description": "Relación inversa entre inflación y desempleo a corto plazo.",
-        "simulation": "Inflación sube al 5%, desempleo baja al 3%."
-    },
-    "8. Multiplicador keynesiano": {
-        "description": "Efecto amplificado del gasto público en la economía.",
-        "simulation": "$100 de gasto público generan $250 en actividad económica (multiplicador = 2.5)."
-    },
-    "9. Asimetría de información": {
-        "description": "Cuando una parte tiene más información que la otra en una transacción.",
-        "simulation": "Un vendedor de autos usados sabe de fallos que el comprador ignora."
-    },
-    "10. Equilibrio de Nash": {
-        "description": "Situación donde nadie mejora cambiando su estrategia unilateralmente.",
-        "simulation": "Dos empresas eligen precios: si ambas bajan, ninguna gana más."
+    # Diccionario con conceptos económicos y sus explicaciones
+    conceptos = {
+        "1. Producto Interno Bruto (PIB)": """
+        El PIB mide el valor total de bienes y servicios finales producidos en un país durante un período específico. 
+        Es como tomar el pulso económico de una nación. Existen tres enfoques para calcularlo: producción, ingreso y gasto.
+        """,
+        
+        "2. Inflación": """
+        Es el aumento sostenido y generalizado en los precios de bienes y servicios. Imagina que tu dinero pierde poder 
+        adquisitivo con el tiempo, como si se "derritiera" lentamente.
+        """,
+        
+        "3. Política Monetaria": """
+        Son las acciones de un banco central para controlar la cantidad de dinero y crédito en la economía. Es como 
+        ajustar las válvulas de una gran máquina económica.
+        """,
+        
+        "4. Curva de Phillips": """
+        Muestra la relación inversa entre inflación y desempleo a corto plazo. Piensa en ello como una balanza: cuando 
+        el desempleo baja, la inflación tiende a subir, y viceversa.
+        """,
+        
+        "5. Ventaja Comparativa": """
+        Es la capacidad de un país para producir un bien a un costo de oportunidad menor que otro. Es como especializarse 
+        en lo que eres relativamente mejor, incluso si no eres el mejor absoluto.
+        """,
+        
+        "6. Elasticidad de la Demanda": """
+        Mide cómo responde la cantidad demandada de un bien ante cambios en su precio. Imagina un resorte: algunos bienes 
+        tienen demanda elástica (muy sensible), otros inelástica (poco sensible).
+        """,
+        
+        "7. Externalidades": """
+        Son costos o beneficios que afectan a terceros no involucrados en una transacción. Como cuando la contaminación 
+        de una fábrica afecta a los vecinos, sin que ellos compren sus productos.
+        """,
+        
+        "8. Teoría de Juegos": """
+        Estudia cómo toman decisiones los agentes cuando sus resultados dependen de las elecciones de otros. Es como 
+        jugar ajedrez económico, anticipando movimientos rivales.
+        """,
+        
+        "9. Paridad del Poder Adquisitivo": """
+        Sugiere que a largo plazo, los tipos de cambio deberían ajustarse para igualar el poder de compra entre países. 
+        Piensa en ello como una balanza internacional de precios.
+        """,
+        
+        "10. Ciclos Económicos": """
+        Son las fluctuaciones recurrentes en la actividad económica: expansión, pico, recesión y recuperación. Como las 
+        olas en el océano de la economía.
+        """
     }
-}
 
-# Función para consultar la API con mejor manejo de errores
-def get_api_response(concept):
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-    data = {
-        "model": "qwen/qwq-32b:free",
-        "messages": [{"role": "user", "content": f"Explain {concept} in simple terms"}]
-    }
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()  # Lanza una excepción si el código HTTP no es 200
-        response_json = response.json()
-        st.write("Respuesta completa de la API:", response_json)  # Para depuración
-        if "choices" in response_json and len(response_json["choices"]) > 0:
-            return response_json["choices"][0]["message"]["content"]
-        else:
-            return f"Error: La respuesta de la API no contiene 'choices'. Respuesta: {json.dumps(response_json)}"
-    except requests.exceptions.RequestException as e:
-        return f"No se pudo conectar a la API: {str(e)}"
-    except KeyError as e:
-        return f"Error en la estructura de la respuesta: {str(e)}"
+    # Menú de selección
+    concepto_seleccionado = st.selectbox("Elige un concepto:", list(conceptos.keys()))
+    
+    # Mostrar explicación
+    st.subheader("Explicación:")
+    st.write(conceptos[concepto_seleccionado])
+    
+    # Ejemplo práctico
+    st.subheader("Ejemplo práctico:")
+    if concepto_seleccionado == "1. Producto Interno Bruto (PIB)":
+        st.write("Si un país produce $100 en autos y $50 en alimentos en un año, su PIB sería $150.")
+    elif concepto_seleccionado == "2. Inflación":
+        st.write("Si un café costaba $1 el año pasado y ahora $1.10, la inflación fue del 10%.")
+    # Podrías agregar más ejemplos para cada concepto
+    
+    # Gráfico simple de ejemplo
+    if st.button("Mostrar gráfico de ejemplo"):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        
+        x = np.linspace(0, 10, 100)
+        y = np.sin(x)
+        plt.plot(x, y)
+        plt.title("Gráfico ilustrativo")
+        st.pyplot(plt)
 
-# Configuración de la aplicación Streamlit
-st.title("Simulador de Conceptos Económicos")
-st.write("Explora 10 conceptos económicos complejos con explicaciones y simulaciones simples.")
-
-# Menú desplegable para seleccionar concepto
-concept = st.selectbox("Selecciona un concepto económico:", list(economic_concepts.keys()))
-
-# Mostrar descripción y simulación
-st.subheader("Explicación")
-st.write(economic_concepts[concept]["description"])
-
-st.subheader("Simulación")
-st.write(economic_concepts[concept]["simulation"])
-
-# Opción para consultar la API
-if st.button("Obtener explicación adicional desde API"):
-    api_response = get_api_response(concept)
-    st.write("Respuesta de la API:", api_response)
-
-# Gráfico simple como ejemplo (para elasticidad)
-if concept == "1. Elasticidad de la demanda":
-    st.line_chart({"Precio": [2, 3], "Demanda": [100, 80]})
+if __name__ == "__main__":
+    main()
