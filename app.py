@@ -1,9 +1,8 @@
 import streamlit as st
 import requests
-import os
 
-# Configuración de la API Key desde Streamlit Secrets
-API_KEY = st.secrets.get("API_KEY", "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")
+# Configuración de la API Key desde Streamlit Secrets (sin valor por defecto en el código)
+API_KEY = st.secrets["API_KEY"]
 
 # Diccionario con conceptos económicos y sus explicaciones
 economic_concepts = {
@@ -49,7 +48,7 @@ economic_concepts = {
     }
 }
 
-# Función para consultar la API (opcional)
+# Función para consultar la API
 def get_api_response(concept):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
@@ -63,8 +62,8 @@ def get_api_response(concept):
     try:
         response = requests.post(url, headers=headers, json=data)
         return response.json()["choices"][0]["message"]["content"]
-    except:
-        return "No se pudo conectar a la API"
+    except Exception as e:
+        return f"No se pudo conectar a la API: {str(e)}"
 
 # Configuración de la aplicación Streamlit
 st.title("Simulador de Conceptos Económicos")
@@ -80,7 +79,7 @@ st.write(economic_concepts[concept]["description"])
 st.subheader("Simulación")
 st.write(economic_concepts[concept]["simulation"])
 
-# Opción para consultar la API (desactivada por simplicidad)
+# Opción para consultar la API
 if st.button("Obtener explicación adicional desde API"):
     api_response = get_api_response(concept)
     st.write("Respuesta de la API:", api_response)
